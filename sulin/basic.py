@@ -1,7 +1,7 @@
 from __future__ import division
 import pandas as pd
 # import seaborn as sb
-from sklearn import linear_model, svm, neighbors, cluster
+from sklearn import linear_model, svm, neighbors, metrics
 
 MERCHANDISE = {'jewelry': 0, 'furniture': 1, 'home goods': 2, 'mobile': 3, 'sporting goods': 4, 'office equipment': 5, 'computers': 6,
 'books and music': 7, 'auto parts': 8, 'clothing': 9}
@@ -76,22 +76,24 @@ for i in xrange(len(bidders)):
 	user = bidders[i]
 	vectors[i] = [num_bids[user], countries_card[user], ips_card[user], merch_card[user]]
 
-print len(bidders)
-
 X = vectors[:1400]
 test_X = vectors[1400:]
 y = outcomes[:1400]
 test_y = outcomes[1400:]
 
-# logreg = linear_model.LogisticRegression()
-# logreg.fit(X, y)
+logreg = linear_model.LogisticRegression()
+logreg.fit(X, y)
 # score = logreg.score(test_X, test_y)
-# print "Logistic Regression: %s" % score
+y_predict = logreg.predict(test_X)
+score = metrics.roc_auc_score(test_y, y_predict)
+print "Logistic Regression: %s" % score
 
-# clf = svm.LinearSVC()
-# clf.fit(X, y)
+clf = svm.LinearSVC()
+clf.fit(X, y)
+y_predict = clf.predict(test_X)
+score = metrics.roc_auc_score(test_y, y_predict)
 # score = clf.score(test_X, test_y)
-# print "Linear SVM: %s" % score
+print "Linear SVM: %s" % score
 
 # clf = svm.SVC(kernel='rbf')
 # clf.fit(X, y)
@@ -108,17 +110,12 @@ test_y = outcomes[1400:]
 # score = clf.score(test_X, test_y)
 # print "SVM, Polynomial kernel: %s" % score
 
-# for i in range(1,7):
-# 	neigh = neighbors.KNeighborsClassifier(n_neighbors=i)
-# 	neigh.fit(X, y)
-# 	score = neigh.score(test_X, test_y)
-# 	print "%s-NN: %s" % (i, score)
-
-for i in range(2,8):
-	clf = cluster.KMeans(n_clusters=i)
-	clf.fit(X, y)
-	score = clf.score(test_X)
-	print "%s-means: %s" % (i, score)
+for i in range(1,7):
+	neigh = neighbors.KNeighborsClassifier(n_neighbors=i)
+	neigh.fit(X, y)
+	y_predict = neigh.predict(test_X)
+	score = metrics.roc_auc_score(test_y, y_predict)
+	print "%s-NN: %s" % (i, score)
 
 """ 179 is greatest # of countries
 111918 is greatest # of IPs """
