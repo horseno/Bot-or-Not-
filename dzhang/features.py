@@ -172,6 +172,6 @@ df_time_diff_auction['diffs'] = dfBids[['bidder_id','time','auction']].groupby([
 df_time_diff_med_auction = df_time_diff_auction.groupby(['bidder_id','auction']).median().reset_index()
 df_time_diff_med_auction = df_time_diff_med_auction.groupby('bidder_id').mean().reset_index()
 df_time_diff_med_auction = df_time_diff_med_auction.fillna(1E30).reset_index()[['bidder_id','diffs']].rename(columns={'diffs':'avg_med_time_interval'})
-pd.merge(df_time_diff_med_auction, df, on = 'bidder_id')
+df = pd.merge(df_time_diff_med_auction, df, on = 'bidder_id')
 
 df.to_csv('features.csv')
