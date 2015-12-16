@@ -171,27 +171,27 @@ def classify(num, tuples):
 		test_X = features[size:]
 		test_y = labels[size:]
 
-		logreg = linear_model.LogisticRegression(class_weight='balanced')
-		logreg.fit(X, y)
-		accuracy = logreg.score(test_X, test_y)
-		y_predict = logreg.predict(test_X)
-		auc = metrics.roc_auc_score(test_y, y_predict)
+		# logreg = linear_model.LogisticRegression(class_weight='balanced')
+		# logreg.fit(X, y)
+		# accuracy = logreg.score(test_X, test_y)
+		# y_predict = logreg.predict(test_X)
+		# auc = metrics.roc_auc_score(test_y, y_predict)
 		# f1 = metrics.f1_score(test_y, y_predict)
 		# score = metrics.average_precision_score(test_y, y_predict)
 		# print "Logistic Regression: %s accuracy, %s AUC" % (accuracy, score)
-		# probs = logreg.predict_proba(test_X)
-		# fpr, tpr, _ = metrics.roc_curve(test_y, probs)
-		lr.append((accuracy, auc))
+		# lr.append((accuracy, auc))
 
-		clf = svm.LinearSVC(class_weight='balanced')
-		clf.fit(X, y)
-		y_predict = clf.predict(test_X)
-		auc = metrics.roc_auc_score(test_y, y_predict)
-		# f1 = metrics.f1_score(test_y, y_predict)
-		accuracy = clf.score(test_X, test_y)
-		# score = metrics.average_precision_score(test_y, y_predict)
-		# print "Linear SVM: %s accuracy, %s AUC" % (accuracy, score)
-		lsvc.append((accuracy, auc))
+		# clf = svm.LinearSVC(class_weight='balanced')
+		# clf.fit(X, y)
+		# # y_predict = clf.predict(test_X)
+		# # auc = metrics.roc_auc_score(test_y, y_predict)
+		# # # f1 = metrics.f1_score(test_y, y_predict)
+		# # accuracy = clf.score(test_X, test_y)
+		# # # score = metrics.average_precision_score(test_y, y_predict)
+		# # # print "Linear SVM: %s accuracy, %s AUC" % (accuracy, score)
+		# # lsvc.append((accuracy, auc))
+		# probs = clf.decision_function(test_X)
+		# fpr, tpr, _ = metrics.roc_curve(test_y, probs)
 
 		# for i in range(1,9):
 		# 	neigh = neighbors.KNeighborsClassifier(n_neighbors=i)
@@ -203,6 +203,11 @@ def classify(num, tuples):
 		# 	score = metrics.average_precision_score(test_y, y_predict)
 		# 	# print "%s-NN: %s accuracy, %s AUC" % (i, accuracy, score)
 		# 	knn[(i-1)].append((accuracy, score, auc))
+
+		# neigh = neighbors.KNeighborsClassifier(n_neighbors=1)
+		# neigh.fit(X, y)
+		# probs = neigh.predict_proba(test_X)[:, 1]
+		# fpr, tpr, _ = metrics.roc_curve(test_y, probs)
 
 		# clf = svm.SVC(kernel='linear')
 		# clf.fit(X, y)
@@ -218,15 +223,15 @@ def classify(num, tuples):
 		# accuracy = clf.score(test_X, test_y)
 		# rbf.append((accuracy, auc))
 
-		clf = tree.DecisionTreeClassifier(class_weight="balanced", random_state=0)
-		clf.fit(X, y)
-		y_predict = clf.predict(test_X)
-		auc = metrics.roc_auc_score(test_y, y_predict)
-		accuracy = clf.score(test_X, test_y)
-		dt.append((accuracy, auc))
+		# clf = tree.DecisionTreeClassifier(class_weight="balanced", random_state=0)
+		# clf.fit(X, y)
+		# # y_predict = clf.predict(test_X)
+		# # auc = metrics.roc_auc_score(test_y, y_predict)
+		# # accuracy = clf.score(test_X, test_y)
+		# # dt.append((accuracy, auc))
 
-		# rfc = ensemble.RandomForestClassifier(n_estimators=10, class_weight='balanced')
-		# rfc.fit(X, y)
+		rfc = ensemble.RandomForestClassifier(n_estimators=10, class_weight='balanced')
+		rfc.fit(X, y)
 		# y_predict = rfc.predict(test_X)
 		# auc = metrics.roc_auc_score(test_y, y_predict)
 		# accuracy = rfc.score(test_X, test_y)
@@ -234,8 +239,10 @@ def classify(num, tuples):
 		# # score = metrics.average_precision_score(test_y, y_predict)
 		# # print "Random Forest: %s accuracy, %s AUC" % (accuracy, score)
 		# rfor.append((accuracy, auc))
+		probs = rfc.predict_proba(test_X)[:, 1]
+		fpr, tpr, _ = metrics.roc_curve(test_y, probs)
 
-	return lr, lsvc, dt
+	return fpr, tpr
 
 # num_bids, countries, ips, merchandise, suspect, auctions, times, bids = get_data('bids.csv')
 # countries_card, ips_card, merch_card, aucs, avg_times = handle_data(countries, ips, merchandise, auctions, times)
@@ -260,16 +267,19 @@ def classify(num, tuples):
 
 time_f, score_f, num_f, bid_num_f, all_f = get_data('features.csv')
 
-lr, lsvc, dt = classify(5, time_f)
+fpr, tpr = classify(1, all_f)
 
-total_acc = 0
-total_auc = 0
-for acc, auc in dt:
-	total_acc += acc
-	total_auc += auc
-acc = total_acc / 5
-auc = total_auc / 5
-print "Decision Tree: %s, %s" % (acc, auc)
+print tuple(fpr)
+print tuple(tpr)
+
+# total_acc = 0
+# total_auc = 0
+# for acc, auc in dt:
+# 	total_acc += acc
+# 	total_auc += auc
+# acc = total_acc / 5
+# auc = total_auc / 5
+# print "Decision Tree: %s, %s" % (acc, auc)
 
 # total_acc = 0
 # total_auc = 0
@@ -289,23 +299,23 @@ print "Decision Tree: %s, %s" % (acc, auc)
 # auc = total_auc / 5
 # print "Polynomial: %s, %s" % (acc, auc)
 
-total_acc = 0
-total_auc = 0
-for acc, auc in lr:
-	total_acc += acc
-	total_auc += auc
-acc = total_acc / 5
-auc = total_auc / 5
-print "Logistic Regression: %s, %s" % (acc, auc)
+# total_acc = 0
+# total_auc = 0
+# for acc, auc in lr:
+# 	total_acc += acc
+# 	total_auc += auc
+# acc = total_acc / 5
+# auc = total_auc / 5
+# print "Logistic Regression: %s, %s" % (acc, auc)
 
-total_acc = 0
-total_auc = 0
-for acc, auc in lsvc:
-	total_acc += acc
-	total_auc += auc
-acc = total_acc / 5
-auc = total_auc / 5
-print "Linear SVM: %s, %s" % (acc, auc)
+# total_acc = 0
+# total_auc = 0
+# for acc, auc in lsvc:
+# 	total_acc += acc
+# 	total_auc += auc
+# acc = total_acc / 5
+# auc = total_auc / 5
+# print "Linear SVM: %s, %s" % (acc, auc)
 
 # total_acc = 0
 # total_score = 0
