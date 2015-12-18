@@ -5,6 +5,8 @@ import random
 
 def get_data(f):
 
+	""" Construct tuples of list of features and outcomes. """
+
 	features = pd.read_csv(f)
 
 	all_f = []
@@ -40,6 +42,13 @@ def get_data(f):
 	return time_f, score_f, num_f, bid_num_f, all_f
 
 def classify(num, tuples):
+
+	""" Run classification 'num' number of times. Returns sums of accuracy and AUROC numbers
+	across all trials. 
+
+	Commented out code for each classifier is the code to calculate class probabilities or
+	confidence scores (depending on the classifier) and, based on those, calculate false positive 
+	rates and true positive rates to use in plotting an ROC curve. """
 
 	lr = [0, 0]
 	lsvc = [0, 0]
@@ -94,6 +103,9 @@ def classify(num, tuples):
 			knn[(i-1)][0] += accuracy
 			knn[(i-1)][1] += auc
 
+		""" We only plotted ROC curves for 1-NN, which was usually the best-performing of the 
+		nearest neighbors classifiers. """
+
 		# neigh = neighbors.KNeighborsClassifier(n_neighbors=1)
 		# neigh.fit(X, y)
 		# probs = neigh.predict_proba(test_X)[:, 1]
@@ -120,16 +132,25 @@ def classify(num, tuples):
 		# fpr, tpr, _ = metrics.roc_curve(test_y, probs)
 
 	return lr, lsvc, knn, dt, rfor
+	# return fpr, tpr
 
 time_f, score_f, num_f, bid_num_f, all_f = get_data('features.csv')
+
+""" Change all_f to time_f, score_f, and so forth to use different features.
+Change num to change the number of trials. """
 
 num = 5
 
 lr, lsvc, knn, dt, rfor = classify(num, all_f)
 
+""" Uncomment to print out false positive and true positive rates for an ROC curve for 
+a single classifier. """
+
 # fpr, tpr = classify(num, all_f)
 # print tuple(fpr)
 # print tuple(tpr)
+
+""" Calculate average accuracies and AUROC scores across trials for each classifier. """
 
 acc = lr[0] / num
 auc = lr[1] / num
